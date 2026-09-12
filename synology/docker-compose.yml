@@ -1,0 +1,18 @@
+services:
+  pronote-homework:
+    image: pronote-homework-exporter:0.2.0-amd64
+    platform: linux/amd64
+    container_name: pronote-homework
+    restart: unless-stopped
+    init: true
+    env_file:
+      - ${ENV_FILE:-pronote.env}
+    ports:
+      - "855:8080"
+    volumes:
+      - ./data:/data
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=16m,mode=1777

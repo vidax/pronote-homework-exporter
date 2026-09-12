@@ -1,0 +1,16 @@
+services:
+  pronote-homework:
+    build: .
+    container_name: pronote-homework
+    restart: unless-stopped
+    init: true
+    env_file: ${ENV_FILE:-.env}
+    ports:
+      - "${HTTP_PORT:-8080}:${HTTP_PORT:-8080}"
+    volumes:
+      - ./data:/data
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=16m,mode=1777

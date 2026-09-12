@@ -1,0 +1,31 @@
+{
+  "content_hash": "d678c544b1ee9219469ca2024242e501100768e950b65297af10ea066ff97357",
+  "generated_at": "2026-09-07T14:00:00Z",
+  "homework": [
+    {
+      "attachments": [],
+      "color": "#F4A261",
+      "description": "Lire les pages 42 à 48 et répondre aux questions 1 à 3.",
+      "done": false,
+      "due": "2026-09-09",
+      "id": "123456",
+      "subject": "FRANÇAIS"
+    }
+  ],
+  "range": {
+    "from": "2026-09-07",
+    "to": "2026-09-28"
+  },
+  "schema_version": 1,
+  "student": {
+    "class": "5E A",
+    "establishment": "COLLÈGE EXEMPLE",
+    "name": "DUPONT Léo"
+  },
+  "summary": {
+    "done": 0,
+    "next_due": "2026-09-09",
+    "pending": 1,
+    "total": 1
+  }
+}

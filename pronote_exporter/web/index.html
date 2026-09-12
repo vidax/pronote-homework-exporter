@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Homework</title>
+    <link rel="stylesheet" href="/assets/styles.css?v=0.2.0">
+    <script src="/assets/app.js?v=0.2.0" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#week-grid">Skip to homework</a>
+
+    <div class="page-shell">
+      <header class="site-header">
+        <div>
+          <p class="eyebrow">Pronote planner</p>
+          <h1>Homework</h1>
+          <p class="student-line" id="student-line">Connecting to the homework service…</p>
+        </div>
+
+        <div class="connection-panel">
+          <p class="connection-status">
+            <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+            <span id="sync-label">Loading the latest snapshot</span>
+          </p>
+        </div>
+      </header>
+
+      <main>
+        <section class="week-toolbar" aria-label="Week navigation">
+          <button class="nav-button" id="previous-week" type="button">
+            <span aria-hidden="true">←</span>
+            <span>Previous</span>
+          </button>
+
+          <div class="week-heading">
+            <p>This planner shows Monday to Friday</p>
+            <h2 id="week-title">Current week</h2>
+          </div>
+
+          <div class="next-actions">
+            <button class="secondary-button" id="current-week" type="button">This week</button>
+            <button class="nav-button nav-button--forward" id="next-week" type="button">
+              <span>Next</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="summary-strip" aria-label="Week summary">
+          <div>
+            <span class="summary-value" id="total-count">—</span>
+            <span class="summary-label">assignments</span>
+          </div>
+          <div>
+            <span class="summary-value" id="pending-count">—</span>
+            <span class="summary-label">still to do</span>
+          </div>
+          <div>
+            <span class="summary-value" id="completed-count">—</span>
+            <span class="summary-label">completed</span>
+          </div>
+        </section>
+
+        <p class="notice" id="notice" role="status" hidden></p>
+        <section class="week-grid" id="week-grid" aria-live="polite" aria-busy="true"></section>
+      </main>
+
+      <footer>
+        <p>Cached on your NAS · Monday to Friday</p>
+      </footer>
+    </div>
+  </body>
+</html>

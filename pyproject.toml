@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pronote-homework-exporter"
+version = "0.2.0"
+description = "Export Pronote homework to stable JSON over HTTP and optionally MQTT"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "paho-mqtt==2.1.0",
+  "pronotepy==2.15.7",
+]
+
+[project.scripts]
+pronote-homework = "pronote_exporter.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["pronote_exporter*"]
+
+[tool.setuptools.package-data]
+pronote_exporter = ["web/*"]
