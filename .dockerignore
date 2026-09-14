@@ -1,8 +1,13 @@
 .git
 .env
+**/.env
+**/*.env
 synology/pronote.env
 .venv
 __pycache__
+**/__pycache__
 *.pyc
+**/*.pyc
 data
+**/data
 tests

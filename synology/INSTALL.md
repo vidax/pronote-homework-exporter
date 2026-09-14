@@ -4,8 +4,14 @@ The recommended installation pulls the image directly from GitHub Container
 Registry. Copy these files into one directory on the NAS:
 
 - `docker-compose.yml`
-- `pronote.env` (create it from `pronote.env.example`)
+- `.env.example` (copy it to `pronote.env`, then enter your private values)
 - an empty `data` directory
+
+Create the private configuration without modifying the public example:
+
+```sh
+cp .env.example pronote.env
+```
 
 In DSM:
 
@@ -24,8 +30,10 @@ authenticate the NAS once with a GitHub personal access token (classic) having
 only `read:packages` permission:
 
 ```sh
-echo 'YOUR_TOKEN' | sudo docker login ghcr.io -u vidax --password-stdin
+sudo docker login ghcr.io -u vidax
 ```
+
+Paste the token at the password prompt so it is not saved in shell history.
 
 Open `http://NAS-IP:855/` for the weekly web planner. It opens directly without
 an API key because it is intended for use on your trusted home network. Each
@@ -44,10 +52,10 @@ IoT completion notifications are available in two ways:
 - Protected polling endpoint `http://NAS-IP:855/v1/events`, with API key and
   `ETag` support.
 
-When upgrading from V1, import the new image and redeploy the Project with the
-updated YAML. Existing `pronote.env` files work unchanged; the completion and
-MQTT event paths have safe defaults. Keep the `data` directory because it now
-contains both the cached homework and the student's saved completion states.
+When upgrading from V1, use the updated GitHub-backed YAML and redeploy the
+Project. Existing `pronote.env` files work unchanged; the completion and MQTT
+event paths have safe defaults. Keep the `data` directory because it contains
+both the cached homework and the student's saved completion states.
 
 When upgrading from V1.1.0, keep the same `data` directory. V1.1.1 automatically
 migrates existing completion records away from Pronote's changing internal IDs.

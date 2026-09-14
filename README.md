@@ -1,9 +1,13 @@
 # Pronote homework exporter
 
-A small service for a NAS. It fetches homework from Pronote on a schedule,
-converts it to a stable JSON format, and serves the last successful snapshot to
-an E-ink device. Pronote access remains read-only; student completion marks are
-stored locally on the NAS.
+A self-hosted Pronote homework service for families. It fetches assignments on
+a schedule, provides a five-day web planner and stable JSON API for E-ink
+devices, and can notify IoT lights or bells through MQTT when work is marked
+Done. Pronote access remains read-only; completion marks are stored locally on
+the NAS and survive refreshes and container updates.
+
+See [INSTALL.md](INSTALL.md) for the public or private GitHub Container Registry
+installation, including Synology DS423+ instructions.
 
 HTTP is the recommended transport: a sleeping device can wake, make one GET,
 and disconnect. MQTT is optional; when configured, the same JSON is published
