@@ -1,8 +1,8 @@
 .git
 .env
+synology/pronote.env
 .venv
 __pycache__
 *.pyc
 data
 tests
-

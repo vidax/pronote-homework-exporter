@@ -39,7 +39,9 @@ def _homework(item: Any) -> dict[str, object]:
         "due": item.date.isoformat(),
         "subject": _text(getattr(getattr(item, "subject", None), "name", "")),
         "description": _text(getattr(item, "description", "")),
-        "done": bool(getattr(item, "done", False)),
+        # Completion in this application is local and intentionally does not
+        # inherit Pronote's own done flag.
+        "done": False,
         "color": color,
         "attachments": attachments,
     }

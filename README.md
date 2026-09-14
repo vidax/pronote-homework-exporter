@@ -72,11 +72,19 @@ Every homework card in the web planner has a **Not done / Done** checkbox. A
 change is saved immediately to `data/completions.json`, so it survives page
 reloads, container restarts, image upgrades, and later Pronote refreshes. This
 is a local planner status: it does not mark the assignment as done in Pronote.
+New homework always starts as **Not done**, regardless of Pronote's status. The
+service assigns a stable local identity to each homework instead of using
+Pronote's changing internal ID, so a saved status remains in place until the
+student explicitly checks or unchecks it.
+
+V1.1.1 automatically migrates V1.1.0 completion records when their stored done
+events contain the homework details. Keep `data/completions.json` during an
+upgrade.
 
 The browser uses this trusted-LAN endpoint:
 
 ```http
-POST /planner/homework/123456/done
+POST /planner/homework/local-0123456789abcdef/done
 Content-Type: application/json
 
 {"done":true}

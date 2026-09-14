@@ -43,13 +43,14 @@ class ModelsTests(unittest.TestCase):
         )
 
         self.assertEqual(snapshot["schema_version"], 1)
-        self.assertEqual(snapshot["summary"]["pending"], 1)  # type: ignore[index]
+        self.assertEqual(snapshot["summary"]["pending"], 2)  # type: ignore[index]
         self.assertEqual(snapshot["summary"]["next_due"], "2026-09-09")  # type: ignore[index]
         self.assertEqual(snapshot["homework"][0]["id"], "1")  # type: ignore[index]
         self.assertEqual(
             snapshot["homework"][0]["description"], "Lire le texte"  # type: ignore[index]
         )
         self.assertEqual(snapshot["homework"][1]["color"], "#ABCDEF")  # type: ignore[index]
+        self.assertFalse(snapshot["homework"][1]["done"])  # type: ignore[index]
         self.assertTrue(encode_snapshot(snapshot).endswith(b"\n"))
 
     def test_content_hash_ignores_fetch_time(self) -> None:

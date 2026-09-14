@@ -93,7 +93,12 @@ class HomeworkService:
                 (
                     item
                     for item in assignments
-                    if isinstance(item, dict) and str(item.get("id", "")) == homework_id
+                    if isinstance(item, dict)
+                    and homework_id
+                    in {
+                        str(item.get("local_id", "")),
+                        str(item.get("id", "")),
+                    }
                 ),
                 None,
             )
@@ -127,7 +132,11 @@ class HomeworkService:
             updated = next(
                 item
                 for item in document["homework"]
-                if str(item.get("id", "")) == homework_id
+                if homework_id
+                in {
+                    str(item.get("local_id", "")),
+                    str(item.get("id", "")),
+                }
             )
             return {"homework": updated, "event": event}
 

@@ -131,7 +131,7 @@ function homeworkCard(homework) {
     statusText.textContent = "Saving…";
     try {
       const response = await fetch(
-        `/planner/homework/${encodeURIComponent(String(homework.id))}/done`,
+        `/planner/homework/${encodeURIComponent(String(homework.local_id || homework.id))}/done`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

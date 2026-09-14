@@ -2,7 +2,7 @@
 
 Copy these files into one directory on the NAS:
 
-- `pronote-homework-exporter-1.1.0-amd64.tar`
+- `pronote-homework-exporter-1.1.1-amd64.tar`
 - `docker-compose.yml`
 - `pronote.env` (create it from `pronote.env.example`)
 - an empty `data` directory
@@ -11,7 +11,7 @@ In DSM:
 
 1. Install **Container Manager** from Package Center.
 2. Open **Container Manager > Image > Action > Import > Add from file** and
-   select `pronote-homework-exporter-1.1.0-amd64.tar`.
+   select `pronote-homework-exporter-1.1.1-amd64.tar`.
 3. In File Station, create a folder such as
    `/volume1/docker/pronote-homework`, put `docker-compose.yml` and `pronote.env`
    inside it, and create its `data` subfolder.
@@ -23,7 +23,9 @@ In DSM:
 Open `http://NAS-IP:855/` for the weekly web planner. It opens directly without
 an API key because it is intended for use on your trusted home network. Each
 homework card has a checkbox; its status is persisted in
-`data/completions.json` on the NAS.
+`data/completions.json` on the NAS. New homework always starts as **Not done**.
+After the student marks it **Done**, it stays done across Pronote refreshes
+until somebody unchecks it; Pronote's own status is not used.
 
 The protected JSON endpoint remains `http://NAS-IP:855/homework.json`. Send the
 configured API key in the `X-API-Key` HTTP header.
@@ -39,3 +41,6 @@ When upgrading from V1, import the new image and redeploy the Project with the
 updated YAML. Existing `pronote.env` files work unchanged; the completion and
 MQTT event paths have safe defaults. Keep the `data` directory because it now
 contains both the cached homework and the student's saved completion states.
+
+When upgrading from V1.1.0, keep the same `data` directory. V1.1.1 automatically
+migrates existing completion records away from Pronote's changing internal IDs.

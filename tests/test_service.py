@@ -22,12 +22,16 @@ class FakeSource:
 
 
 class AssignedSource:
+    def __init__(self) -> None:
+        self.fetch_count = 0
+
     def fetch(self, date_from: date, date_to: date) -> dict[str, object]:
+        self.fetch_count += 1
         student = SimpleNamespace(
             name="DUPONT Léo", class_name="5E A", establishment="Collège"
         )
         assignment = SimpleNamespace(
-            id="42",
+            id="42" if self.fetch_count == 1 else "changed-pronote-id",
             date=date_from,
             subject=SimpleNamespace(name="Maths"),
             description="Exercises 1–3",
@@ -93,7 +97,9 @@ class ServiceTests(unittest.TestCase):
             )
 
             self.assertTrue(service.refresh(raise_errors=True))
-            changed = service.set_homework_done("42", True)
+            initial = json.loads(state.snapshot().payload)  # type: ignore[union-attr]
+            local_id = initial["homework"][0]["local_id"]
+            changed = service.set_homework_done(local_id, True)
             self.assertTrue(changed["homework"]["done"])  # type: ignore[index]
             self.assertEqual(changed["event"]["type"], "homework.done")  # type: ignore[index]
             self.assertEqual(len(publisher.events), 1)
@@ -101,6 +107,7 @@ class ServiceTests(unittest.TestCase):
 
             self.assertTrue(service.refresh(raise_errors=True))
             current = json.loads(state.snapshot().payload)  # type: ignore[union-attr]
+            self.assertEqual(current["homework"][0]["id"], "changed-pronote-id")
             self.assertTrue(current["homework"][0]["done"])
             self.assertEqual(current["homework"][0]["done_source"], "local")
 

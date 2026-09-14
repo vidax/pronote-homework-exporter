@@ -1,5 +1,6 @@
 .DS_Store
 .env
+synology/pronote.env
 .venv/
 __pycache__/
 *.py[cod]
