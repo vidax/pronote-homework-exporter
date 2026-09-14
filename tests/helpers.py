@@ -18,6 +18,7 @@ def settings(output_path: Path, **changes: object) -> Settings:
         "account_pin": "",
         "credentials_path": output_path.parent / "credentials.json",
         "output_path": output_path,
+        "completion_path": output_path.parent / "completions.json",
         "days_past": 0,
         "days_ahead": 21,
         "refresh_interval": 900,
@@ -30,9 +31,9 @@ def settings(output_path: Path, **changes: object) -> Settings:
         "mqtt_username": "",
         "mqtt_password": "",
         "mqtt_topic": "pronote/homework",
+        "mqtt_event_topic": "pronote/homework/done",
         "mqtt_qos": 1,
         "mqtt_tls": False,
     }
     values.update(changes)
     return Settings(**values)  # type: ignore[arg-type]
-

@@ -3,12 +3,14 @@ from __future__ import annotations
 import hmac
 import json
 import logging
+import re
 from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
-from typing import Any
-from urllib.parse import urlsplit
+from typing import Any, Callable
+from urllib.parse import unquote, urlsplit
 
+from .completion import EventFeed
 from .state import RuntimeState
 
 LOGGER = logging.getLogger(__name__)
@@ -39,9 +41,13 @@ class HomeworkHTTPServer(ThreadingHTTPServer):
         address: tuple[str, int],
         state: RuntimeState,
         api_key: str,
+        completion_handler: Callable[[str, bool], dict[str, object]] | None = None,
+        events_provider: Callable[[], EventFeed] | None = None,
     ):
         self.state = state
         self.api_key = api_key
+        self.completion_handler = completion_handler
+        self.events_provider = events_provider
         super().__init__(address, HomeworkRequestHandler)
 
 
@@ -54,6 +60,9 @@ class HomeworkRequestHandler(BaseHTTPRequestHandler):
 
     def do_HEAD(self) -> None:  # noqa: N802 - stdlib handler API
         self._handle(send_body=False)
+
+    def do_POST(self) -> None:  # noqa: N802 - stdlib handler API
+        self._handle_post()
 
     def _authorized(self) -> bool:
         expected = self.server.api_key
@@ -95,6 +104,39 @@ class HomeworkRequestHandler(BaseHTTPRequestHandler):
                 "snapshot_available": health["snapshot_available"],
             }
             self._send_json(200, public_health, send_body=send_body)
+            return
+
+        if path == "/v1/events":
+            if not self._authorized():
+                self._send_json(
+                    401,
+                    {"error": "unauthorized"},
+                    send_body=send_body,
+                    extra_headers={"WWW-Authenticate": "Bearer"},
+                )
+                return
+            if self.server.events_provider is None:
+                self._send_json(
+                    503, {"error": "events_unavailable"}, send_body=send_body
+                )
+                return
+            feed = self.server.events_provider()
+            if self.headers.get("If-None-Match") == feed.etag:
+                self.send_response(304)
+                self.send_header("ETag", feed.etag)
+                self.send_header("Cache-Control", "private, no-cache")
+                self.end_headers()
+                return
+            self._send(
+                200,
+                feed.payload,
+                "application/json; charset=utf-8",
+                send_body=send_body,
+                extra_headers={
+                    "ETag": feed.etag,
+                    "Cache-Control": "private, no-cache",
+                },
+            )
             return
 
         if path not in {
@@ -148,6 +190,62 @@ class HomeworkRequestHandler(BaseHTTPRequestHandler):
                 "Cache-Control": "private, no-cache",
             },
         )
+
+    def _handle_post(self) -> None:
+        path = urlsplit(self.path).path
+        match = re.fullmatch(r"/planner/homework/([^/]+)/done", path)
+        if match is None:
+            self._send_json(404, {"error": "not_found"}, send_body=True)
+            return
+        if self.server.completion_handler is None:
+            self._send_json(
+                503, {"error": "completion_unavailable"}, send_body=True
+            )
+            return
+
+        content_type = self.headers.get("Content-Type", "").split(";", 1)[0].strip()
+        if content_type.lower() != "application/json":
+            self._send_json(
+                415, {"error": "application_json_required"}, send_body=True
+            )
+            return
+
+        try:
+            content_length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            content_length = 0
+        if content_length <= 0:
+            self._send_json(400, {"error": "invalid_json"}, send_body=True)
+            return
+        if content_length > 4096:
+            self._send_json(413, {"error": "request_too_large"}, send_body=True)
+            return
+        try:
+            body = json.loads(self.rfile.read(content_length))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._send_json(400, {"error": "invalid_json"}, send_body=True)
+            return
+        if not isinstance(body, dict) or not isinstance(body.get("done"), bool):
+            self._send_json(
+                400, {"error": "done_must_be_boolean"}, send_body=True
+            )
+            return
+
+        homework_id = unquote(match.group(1))
+        try:
+            result = self.server.completion_handler(homework_id, body["done"])
+        except LookupError:
+            self._send_json(404, {"error": "homework_not_found"}, send_body=True)
+            return
+        except (OSError, RuntimeError, ValueError):
+            LOGGER.exception("Cannot update homework status")
+            self._send_json(
+                503,
+                {"error": "completion_failed"},
+                send_body=True,
+            )
+            return
+        self._send_json(200, result, send_body=True)
 
     def _send_json(
         self,

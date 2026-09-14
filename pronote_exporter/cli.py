@@ -62,7 +62,11 @@ def main() -> int:
         scheduler.start()
 
         server = HomeworkHTTPServer(
-            (settings.http_host, settings.http_port), state, settings.api_key
+            (settings.http_host, settings.http_port),
+            state,
+            settings.api_key,
+            completion_handler=service.set_homework_done,
+            events_provider=service.completion_events,
         )
 
         def stop(_signal: int, _frame: object) -> None:
@@ -90,4 +94,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

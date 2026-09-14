@@ -76,6 +76,15 @@ class RuntimeState:
             self._last_error = f"{type(error).__name__}: {error}"
             self._refreshing = False
 
+    def replace_snapshot(self, snapshot: Snapshot) -> None:
+        """Replace cached data after a local status change without a Pronote fetch."""
+        with self._lock:
+            self._snapshot = snapshot
+
+    def set_mqtt_error(self, error: str | None) -> None:
+        with self._lock:
+            self._mqtt_error = error
+
     def snapshot(self) -> Snapshot | None:
         with self._lock:
             return self._snapshot

@@ -27,7 +27,8 @@ body {
   background-color: var(--paper);
 }
 
-button {
+button,
+input {
   font: inherit;
 }
 
@@ -36,6 +37,7 @@ button {
 }
 
 button:focus-visible,
+input:focus-visible,
 a:focus-visible {
   outline: 3px solid #6a9b88;
   outline-offset: 3px;
@@ -354,22 +356,41 @@ button:disabled {
   text-transform: uppercase;
 }
 
-.done-badge {
-  flex: 0 0 auto;
-  padding: 2px 5px;
-  color: var(--accent);
-  background: var(--accent-soft);
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
 .homework-description {
   margin: 0;
   font-size: 0.86rem;
   line-height: 1.48;
   overflow-wrap: anywhere;
+}
+
+.status-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  margin-top: 12px;
+  padding-top: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.status-control input {
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.status-control input:disabled {
+  cursor: wait;
+}
+
+.homework-card.is-done .status-label {
+  color: var(--accent);
 }
 
 .is-done .homework-description {

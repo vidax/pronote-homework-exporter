@@ -59,6 +59,7 @@ class Settings:
     account_pin: str
     credentials_path: Path
     output_path: Path
+    completion_path: Path
     days_past: int
     days_ahead: int
     refresh_interval: int
@@ -71,6 +72,7 @@ class Settings:
     mqtt_username: str
     mqtt_password: str
     mqtt_topic: str
+    mqtt_event_topic: str
     mqtt_qos: int
     mqtt_tls: bool
 
@@ -133,6 +135,9 @@ class Settings:
             account_pin=_secret("PRONOTE_ACCOUNT_PIN"),
             credentials_path=credentials_path,
             output_path=Path(_value("OUTPUT_PATH", "/data/homework.json")),
+            completion_path=Path(
+                _value("COMPLETION_PATH", "/data/completions.json")
+            ),
             days_past=_integer("DAYS_PAST", 7, 0, 31),
             days_ahead=_integer("DAYS_AHEAD", 21, 1, 180),
             refresh_interval=_integer("REFRESH_INTERVAL", 900, 300, 86400),
@@ -145,6 +150,7 @@ class Settings:
             mqtt_username=_value("MQTT_USERNAME"),
             mqtt_password=_secret("MQTT_PASSWORD"),
             mqtt_topic=_value("MQTT_TOPIC", "pronote/homework"),
+            mqtt_event_topic=_value("MQTT_EVENT_TOPIC", "pronote/homework/done"),
             mqtt_qos=mqtt_qos,
             mqtt_tls=_boolean("MQTT_TLS", False),
         )

@@ -45,6 +45,36 @@ def _homework(item: Any) -> dict[str, object]:
     }
 
 
+def refresh_snapshot_metadata(snapshot: dict[str, object]) -> dict[str, object]:
+    """Recalculate fields derived from the student and homework arrays."""
+    assignments = snapshot.get("homework", [])
+    student_data = snapshot.get("student", {})
+    if not isinstance(assignments, list) or not isinstance(student_data, dict):
+        raise ValueError("Snapshot has invalid student or homework data")
+
+    canonical = json.dumps(
+        {"student": student_data, "homework": assignments},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    snapshot["content_hash"] = hashlib.sha256(canonical).hexdigest()
+
+    pending = sum(not bool(item.get("done")) for item in assignments)
+    due_dates = [
+        str(item.get("due"))
+        for item in assignments
+        if not item.get("done") and item.get("due")
+    ]
+    snapshot["summary"] = {
+        "total": len(assignments),
+        "pending": pending,
+        "done": len(assignments) - pending,
+        "next_due": min(due_dates) if due_dates else None,
+    }
+    return snapshot
+
+
 def build_snapshot(
     homework: Iterable[Any],
     student: Any,
@@ -68,33 +98,15 @@ def build_snapshot(
         "class": _text(getattr(student, "class_name", "")),
         "establishment": _text(getattr(student, "establishment", "")),
     }
-    canonical = json.dumps(
-        {"student": student_data, "homework": assignments},
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    content_hash = hashlib.sha256(canonical).hexdigest()
-
-    pending = sum(not bool(item["done"]) for item in assignments)
-    due_dates = [str(item["due"]) for item in assignments if not item["done"]]
-
-    return {
+    return refresh_snapshot_metadata({
         "schema_version": 1,
         "generated_at": generated_at.astimezone(timezone.utc)
         .isoformat(timespec="seconds")
         .replace("+00:00", "Z"),
-        "content_hash": content_hash,
         "range": {"from": date_from.isoformat(), "to": date_to.isoformat()},
         "student": student_data,
-        "summary": {
-            "total": len(assignments),
-            "pending": pending,
-            "done": len(assignments) - pending,
-            "next_due": min(due_dates) if due_dates else None,
-        },
         "homework": assignments,
-    }
+    })
 
 
 def encode_snapshot(snapshot: dict[str, object]) -> bytes:

@@ -102,9 +102,6 @@ function homeworkCard(homework) {
 
   const topLine = createElement("div", "card-topline");
   topLine.append(createElement("h3", "subject-name", homework.subject || "Homework"));
-  if (homework.done) {
-    topLine.append(createElement("span", "done-badge", "Done"));
-  }
   card.append(topLine);
   card.append(
     createElement(
@@ -113,6 +110,51 @@ function homeworkCard(homework) {
       homework.description || "No description provided."
     )
   );
+
+  const statusControl = createElement("label", "status-control");
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = Boolean(homework.done);
+  checkbox.setAttribute(
+    "aria-label",
+    `Mark ${homework.subject || "homework"} due ${homework.due || "soon"} as done`
+  );
+  const statusText = createElement(
+    "span",
+    "status-label",
+    homework.done ? "Done" : "Not done"
+  );
+  statusControl.append(checkbox, statusText);
+  checkbox.addEventListener("change", async () => {
+    const requestedDone = checkbox.checked;
+    checkbox.disabled = true;
+    statusText.textContent = "Saving…";
+    try {
+      const response = await fetch(
+        `/planner/homework/${encodeURIComponent(String(homework.id))}/done`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ done: requestedDone }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`The homework service returned HTTP ${response.status}.`);
+      }
+      const result = await response.json();
+      Object.assign(homework, result.homework);
+      setNotice("");
+      render();
+    } catch (error) {
+      checkbox.checked = !requestedDone;
+      checkbox.disabled = false;
+      statusText.textContent = checkbox.checked ? "Done" : "Not done";
+      setNotice(
+        error instanceof Error ? error.message : "Unable to save the homework status."
+      );
+    }
+  });
+  card.append(statusControl);
 
   if (Array.isArray(homework.attachments) && homework.attachments.length > 0) {
     const list = createElement("ul", "attachment-list");
