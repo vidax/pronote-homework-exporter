@@ -1,0 +1,53 @@
+name: Publish container image
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
+
+      - name: Build and publish the image
+        shell: bash
+        run: |
+          image_name="${IMAGE_NAME,,}"
+          sha_tag="sha-${GITHUB_SHA::12}"
+
+          docker build \
+            --platform linux/amd64 \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --tag "${image_name}:${sha_tag}" \
+            .
+          docker push "${image_name}:${sha_tag}"
+
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            docker tag "${image_name}:${sha_tag}" "${image_name}:latest"
+            docker push "${image_name}:latest"
+          fi
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            docker tag "${image_name}:${sha_tag}" "${image_name}:${version}"
+            docker push "${image_name}:${version}"
+          fi

@@ -34,6 +34,18 @@ See [examples/homework.json](examples/homework.json).
 
 ## NAS quick start with Docker Compose
 
+The Synology Compose file pulls the current Linux/AMD64 image from GitHub
+Container Registry:
+
+```text
+ghcr.io/vidax/pronote-homework-exporter:latest
+```
+
+The GitHub Actions workflow publishes `latest` after tests pass on `main`.
+Because `latest` is a moving tag, use `docker compose pull` followed by
+`docker compose up -d` (or redeploy the Container Manager project) to replace a
+running container. Persistent data remains in the mounted `data` directory.
+
 1. Copy the sample configuration and create the data directory:
 
    ```sh

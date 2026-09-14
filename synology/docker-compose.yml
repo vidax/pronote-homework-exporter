@@ -1,6 +1,7 @@
 services:
   pronote-homework:
-    image: pronote-homework-exporter:1.1.1-amd64
+    image: ghcr.io/vidax/pronote-homework-exporter:latest
+    pull_policy: always
     platform: linux/amd64
     container_name: pronote-homework
     restart: unless-stopped

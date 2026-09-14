@@ -1,8 +1,8 @@
 # Synology DS423+ installation
 
-Copy these files into one directory on the NAS:
+The recommended installation pulls the image directly from GitHub Container
+Registry. Copy these files into one directory on the NAS:
 
-- `pronote-homework-exporter-1.1.1-amd64.tar`
 - `docker-compose.yml`
 - `pronote.env` (create it from `pronote.env.example`)
 - an empty `data` directory
@@ -10,15 +10,22 @@ Copy these files into one directory on the NAS:
 In DSM:
 
 1. Install **Container Manager** from Package Center.
-2. Open **Container Manager > Image > Action > Import > Add from file** and
-   select `pronote-homework-exporter-1.1.1-amd64.tar`.
-3. In File Station, create a folder such as
+2. In File Station, create a folder such as
    `/volume1/docker/pronote-homework`, put `docker-compose.yml` and `pronote.env`
    inside it, and create its `data` subfolder.
-4. Open **Container Manager > Project > Create**.
-5. Use project name `pronote-homework`, select the folder from step 3, and use
+3. Open **Container Manager > Project > Create**.
+4. Use project name `pronote-homework`, select the folder from step 2, and use
    the existing `docker-compose.yml` as the project source.
-6. Build/create the project, then start it.
+5. Build/create the project, then start it. Container Manager pulls
+   `ghcr.io/vidax/pronote-homework-exporter:latest` automatically.
+
+The GitHub package must be public for an anonymous pull. If it is private,
+authenticate the NAS once with a GitHub personal access token (classic) having
+only `read:packages` permission:
+
+```sh
+echo 'YOUR_TOKEN' | sudo docker login ghcr.io -u vidax --password-stdin
+```
 
 Open `http://NAS-IP:855/` for the weekly web planner. It opens directly without
 an API key because it is intended for use on your trusted home network. Each
@@ -44,3 +51,25 @@ contains both the cached homework and the student's saved completion states.
 
 When upgrading from V1.1.0, keep the same `data` directory. V1.1.1 automatically
 migrates existing completion records away from Pronote's changing internal IDs.
+
+## Publishing and updating from GitHub
+
+The workflow in `.github/workflows/publish-container.yml` runs the tests and
+publishes a Linux/AMD64 image whenever `main` is pushed. The moving image tag is:
+
+```text
+ghcr.io/vidax/pronote-homework-exporter:latest
+```
+
+The Compose file uses `pull_policy: always`, so every project redeployment
+checks GitHub for a newer image. The `latest` tag does not replace an already
+running container by itself. For a later update, redeploy the project in
+Container Manager, or run from the project directory:
+
+```sh
+sudo docker compose pull pronote-homework
+sudo docker compose up -d pronote-homework
+```
+
+The mounted `data` directory and `pronote.env` remain untouched during an image
+update.
